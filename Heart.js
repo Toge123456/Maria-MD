@@ -24,7 +24,8 @@ const { fetchBuffer, buffergif } = require("./Gallery/lib/myfunc2")
 /////log
 global.ownernumber = '919931122319' 
 //Gallery/database
-let ntilinkall =JSON.parse(fs.readFileSync('./Gallery/database/antilink.json'))
+let ntilinkall =JSON.parse(fs.readFileSync('./Gallery/database/antilink.json'));
+const isnsfw = JSON.parse(fs.readFileSync('./Gallery/database/nsfw.json'));
 let _owner = JSON.parse(fs.readFileSync('./Gallery/database/owner.json'))
 let owner = JSON.parse(fs.readFileSync('./Gallery/database/owner.json'))
 let _afk = JSON.parse(fs.readFileSync('./Gallery/database/afk-user.json'))
@@ -110,7 +111,11 @@ module.exports = Maria = async (Maria, m, msg, chatUpdate, store) => {
         const mentionByReply = type == 'extendedTextMessage' && m.message.extendedTextMessage.contextInfo != null ? m.message.extendedTextMessage.contextInfo.participant || '' : ''
         const isGroupOwner = m.isGroup ? (groupOwner ? groupOwner : groupAdmins).includes(m.sender) : false
         const isCreator = [ownernumber, ..._owner].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
-      const AntiLinkAll = m.isGroup ? ntilinkall.includes(from) : false
+      const AntiLinkAll = m.isGroup ? ntilinkall.includes(from) : false;
+      const isNsfw = m.isGroup ? isnsfw.includes(from) : false;
+      const AntiNsfw = m.isGroup ? isnsfw.includes(from) : false
+ /////
+ 
 //group chat msg by Ayush
 const reply = (teks) => {
 Maria.sendMessage(m.chat,
@@ -638,7 +643,7 @@ reply('Success in turning off all antilink in this group')
                 if (!isAdmins && !isGroupOwner && !isCreator) return reply(mess.admin)
                 if (!isBotAdmins) return reply(mess.botAdmin)
                 if (!text) return 'Text ?'
-                await Maria.groupUpdateSubject(m.chat, text).then((res) => reply(mess.success)).catch((err) => reply(json(err)))
+                await Maria.groupUpdateSubject(m.chat, text).then((res) => reply(mess.done)).catch((err) => reply(json(err)))
                 break
             case 'setdesc':
             case 'setdesk':
@@ -646,7 +651,7 @@ reply('Success in turning off all antilink in this group')
                 if (!isAdmins && !isGroupOwner && !isCreator) return reply(mess.admin)
                 if (!isBotAdmins) return reply(mess.botAdmin)
                 if (!text) return 'Text ?'
-                await Maria.groupUpdateDescription(m.chat, text).then((res) => reply(mess.success)).catch((err) => reply(json(err)))
+                await Maria.groupUpdateDescription(m.chat, text).then((res) => reply(mess.done)).catch((err) => reply(json(err)))
                 break
             case 'setppgroup':
             case 'setppgrup':
@@ -1086,13 +1091,16 @@ break
                 })
             }
             break
+
 case 'play':  case 'song': {
+Maria.sendMessage(from, { react: { text: "📥", key: m.key }}) 
 if (!text) return reply(`Example : ${prefix + command} anime whatsapp status`)
 const Ayushplaymp3 = require('./Gallery/lib/ytdl2')
 let yts = require("youtube-yts")
         let search = await yts(text)
         let anup3k = search.videos[0]
-const pl= await Ayushplaymp3.mp3(anup3k.url)
+const pl= await Ayushplaymp3.mp3(anup3k.url);
+m.reply('```✅ Song found! Sending...```');
 await Maria.sendMessage(m.chat,{
     audio: fs.readFileSync(pl.path),
     fileName: anup3k.title + '.mp3',
@@ -1150,6 +1158,7 @@ break
 ///////////////////////////////////////////////////
 
 case 'chatgpt': case 'gpt':{
+Maria.sendMessage(from, { react: { text: "🤖", key: m.key }}) 
               if (!q) return reply(`Please provide a text query. Example: ${prefix + command} Hello, ChatGPT!`);
             
               const apiUrl1 = `https://vihangayt.me/tools/chatgpt?q=${encodeURIComponent(q)}`;
@@ -1201,6 +1210,7 @@ case 'chatgpt': case 'gpt':{
         Maria.sendMessage(m.chat, { image: { url: "./Gallery/ch1.jpg" }, caption: txxt, gifPlayback: true }, { quoted: m });
         break
       case "support":
+      Maria.sendMessage(from, { react: { text: "🤝", key: m.key }}) 
       
         let tex = `📍My Developer's Group📍\n\n*🎇 𝐌𝐚𝐫𝐢𝐚 support group:🎇*\n\n*https://chat.whatsapp.com/Jllsl2OaQNoBjepxzuVsZM*`
 
@@ -1210,8 +1220,7 @@ case 'chatgpt': case 'gpt':{
         break
 
       case "info":
-            
-      
+            Maria.sendMessage(from, { react: { text: "ℹ️", key: m.key }}) 
         let ifx = `🌟『𝕄𝕒𝕣𝕚𝕒-𝕄𝕕 』🌟
 *🌟Description:* A WhatsApp Bot With Rich  features based on Maria
 *🚦Uptime:* ${runtime(process.uptime())}
@@ -1223,7 +1232,7 @@ Maria.sendMessage(m.chat, { image: { url: "./Gallery/ch3.jpg" }, caption: ifx, g
 
  
       case 'owner': case 'creator': case 'mod': case 'mods': {
-      
+      Maria.sendMessage(from, { react: { text: "☎️", key: m.key }}) 
         Maria.sendContact(m.chat, global.Owner, m)
       }
 
@@ -1232,6 +1241,7 @@ Maria.sendMessage(m.chat, { image: { url: "./Gallery/ch3.jpg" }, caption: ifx, g
             
 ///////////////////////////////////////////////////
 case 'google': {
+Maria.sendMessage(from, { react: { text: "🔎", key: m.key }}) 
 if (!q) return reply(`Example : ${prefix + command} 𝘈𝘺𝘶𝘴𝘩 𝘱𝘢𝘯𝘥𝘦𝘺`)
 let google = require('google-it')
 google({'query': text}).then(res => {
@@ -1499,6 +1509,7 @@ case 'truth':
                            break
                            
      case 'menu': case 'help': case 'h':
+     Maria.sendMessage(from, { react: { text: "🍭", key: m.key }})   
 const txt = `Konichiwa *${pushname}* Senpai! 🎄 Merry Christmas! ,
 
 I am *Maria-Md*, a bot developed by *Ayush*.
@@ -1598,7 +1609,11 @@ Here's the list of my Commands.
 │⊳ 🏮 ${prefix}circlevideo
 │⊳ 🏮 ${prefix}google
 │⊳ 🏮 ${prefix}gpt
-└──────────⊰`
+└──────────⊰
+🍂 To enable NSFW (Admin only!), enter  *${prefix}nsfw* 
+
+🍂 Obtain the full list of NSFW commands by typing  *${prefix}nsfwmenu* 
+`
 const Mariaarray= [
             "https://telegra.ph/file/a979e37a8d2971c088ff4.jpg",
             "https://telegra.ph/file/2a1939dd4157aa5832cc0.jpg",
@@ -1664,6 +1679,133 @@ Cieeee, What's Going On❤️💖👀`,
           );
         }
         break;
+        
+        ///nsfw commands
+      case 'nsfwmenu':
+        if (!isNsfw) return m.reply(mess.nsfw);
+        if (!m.isGroup) return m.reply(mess.group);
+        
+        const nsfwmenu=`┌──⊰ _*🔞NSFW 🔞*_
+│⊳ 💦  ${prefix}blowjob
+│⊳ 💦  ${prefix}cum
+│⊳ 💦  ${prefix}foot
+│⊳ 💦  ${prefix}gangbang
+│⊳ 💦  ${prefix}hentai
+│⊳ 💦  ${prefix}pussy
+│⊳ 💦  ${prefix}ass
+│⊳ 💦  ${prefix}trap
+│⊳ 💦  ${prefix}Maal
+└──────────⊰ 
+`
+        Maria.sendMessage(m.chat, { image: { url: "./Gallery/nsfw.jpg" }, caption: nsfwmenu }, { quoted: m });
+        break
+              case 'nsfw': {
+   Maria.sendMessage(from, { react: { text: "🔞", key: m.key }}) 
+ if (!m.isGroup) return m.reply(mess.group);
+                 if (!isAdmins && !isGroupOwner && !isCreator) return reply(mess.admin)
+                if (!isBotAdmins) return reply(mess.botAdmin)
+if (args[0] === "on") {
+if (AntiNsfw) return reply('Already activated✅️')
+ntnsfw.push(from)
+fs.writeFileSync('./Gallery/database/nsfw.json', JSON.stringify(ntnsfw))
+reply('Success in turning on nsfw in this group')
+var groupe = await Maria.groupMetadata(from)
+var members = groupe['participants']
+var mems = []
+members.map(async adm => {
+mems.push(adm.id.replace('c.us', 's.whatsapp.net'))
+})
+Maria.sendMessage(from, {text: `\`\`\``, contextInfo: { mentionedJid : mems }}, {quoted:m})
+} else if (args[0] === "off") {
+if (!AntiNsfw) return reply('Already deactivated')
+let off = ntnsfw.indexOf(from)
+ntnsfw.splice(off, 1)
+fs.writeFileSync('./Gallery/database/nsfw.json', JSON.stringify(ntnsfw))
+reply('Success in turning off nsfw in this group')
+} else {
+  await reply(`*Kindly input the choice as follows:*
+*Example: ${prefix + command} on*
+*Example: ${prefix + command} off*
+🟢 *Use 'on' to enable and 'off' to disable.* 🔴`)
+  }
+  }
+  break     
+        case 'blowjob':
+ if (!m.isGroup) return m.reply(mess.group);
+   if (!isNsfw) return m.reply(mess.nsfw);
+var ahegaonsfw = JSON.parse(fs.readFileSync('./Gallery/nsfw/blowjob.json'))
+var Mariayresult = pickRandom(ahegaonsfw)
+Maria.sendMessage(m.chat, { caption: mess.done, image: { url: Mariayresult.url } }, { quoted: m })
+break
+
+case 'cum':
+ if (!m.isGroup) return m.reply(mess.group);
+   if (!isNsfw) return m.reply(mess.nsfw);
+var ahegaonsfw = JSON.parse(fs.readFileSync('./Gallery/nsfw/cum.json'))
+var Mariayresult = pickRandom(ahegaonsfw)
+Maria.sendMessage(m.chat, { caption: mess.done, image: { url: Mariayresult.url } }, { quoted: m })
+break
+
+case 'foot':
+ if (!m.isGroup) return m.reply(mess.group); 
+  if (!isNsfw) return m.reply(mess.nsfw);
+var ahegaonsfw = JSON.parse(fs.readFileSync('./Gallery/nsfw/foot.json'))
+var Mariayresult = pickRandom(ahegaonsfw)
+Maria.sendMessage(m.chat, { caption: mess.done, image: { url: Mariayresult.url } }, { quoted: m })
+break
+
+case 'gangbang':
+ if (!m.isGroup) return m.reply(mess.group);
+   if (!isNsfw) return m.reply(mess.nsfw);
+var ahegaonsfw = JSON.parse(fs.readFileSync('./Gallery/nsfw/gangbang.json'))
+var Mariayresult = pickRandom(ahegaonsfw)
+Maria.sendMessage(m.chat, { caption: mess.done, image: { url: Mariayresult.url } }, { quoted: m })
+break
+
+case 'hentai':
+ if (!m.isGroup) return m.reply(mess.group);
+   if (!isNsfw) return m.reply(mess.nsfw);
+var ahegaonsfw = JSON.parse(fs.readFileSync('./Gallery/nsfw/hentai.json'))
+var Mariayresult = pickRandom(ahegaonsfw)
+Maria.sendMessage(m.chat, { caption: mess.done, image: { url: Mariayresult.url } }, { quoted: m })
+break
+
+case 'pussy':
+ if (!m.isGroup) return m.reply(mess.group);   
+if (!isNsfw) return m.reply(mess.nsfw);
+var ahegaonsfw = JSON.parse(fs.readFileSync('./Gallery/nsfw/pussy.json'))
+var Mariayresult = pickRandom(ahegaonsfw)
+Maria.sendMessage(m.chat, { caption: mess.done, image: { url: Mariayresult.url } }, { quoted: m })
+break
+
+case 'ass':
+ if (!m.isGroup) return m.reply(mess.group);  
+ if (!isNsfw) return m.reply(mess.nsfw);
+var ahegaonsfw = JSON.parse(fs.readFileSync('./Gallery/nsfw/ass.json'))
+var Mariayresult = pickRandom(ahegaonsfw)
+Maria.sendMessage(m.chat, { caption: mess.done, image: { url: Mariayresult.url } }, { quoted: m })
+break
+
+case 'trap' :
+ if (!m.isGroup) return m.reply(mess.group);  
+ if (!isNsfw) return m.reply(mess.nsfw);
+ waifudd = await axios.get(`https://waifu.pics/api/nsfw/${command}`)       
+Maria.sendMessage(m.chat, { caption: mess.done, image: { url:waifudd.data.url } }, { quoted: m })
+break
+
+case 'maal': {
+  if (!isNsfw) return m.reply(mess.nsfw);
+  if (!m.isGroup) return m.reply(mess.group);
+  m.reply(mess.wait);
+  await Maria.sendMessage(m.chat, {
+    image: await getBuffer('https://ayushhh.onrender.com'),
+    caption: '```Random NSFW image```',
+  }, { quoted: m });
+}
+break;
+
+
+			    ////
               case 'awesomecheck':
   case 'greatcheck':
     case 'gaycheck':
@@ -1686,8 +1828,17 @@ Maria.sendMessage(from, { text: 'Question : *' + cex + '*\nChecker : ' + `@${men
 Maria.sendMessage(from, { text: 'Question : *' + cex + '*\nChecker : ' + `@${sender.split('@')[0]}` + '\nAnswer : ' + cek2 + '%', mentions: [sender] }, { quoted: m })
 }
 break
-                
+         case 'pinterest': {
+            	
+                reply(mess.wait)
+		let { pinterest } = require('./lib/scraper')
+                anu = await pinterest(text)
+                result = anu[Math.floor(Math.random() * anu.length)]
+                Maria.sendMessage(m.chat, { image: { url: result }, caption: '🎀Media Url : '+result }, { quoted: m })
+            }
+            break       
 case 'runtime': {
+Maria.sendMessage(from, { react: { text: "🔖", key: m.key }}) 
       
             	let lowq = `*The Bot Has Been Online For:*\n*${runtime(process.uptime())}*`
                 reply(lowq)
